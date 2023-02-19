@@ -7,6 +7,7 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 router.register(r"staff/users", views.UserViewSet)
+router.register(r"staff/pictures", views.PicturesViewSet)
 
 urlpatterns = [
     path("admin/", admin.site.urls),

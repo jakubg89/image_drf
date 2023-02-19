@@ -23,3 +23,24 @@ class UserSerializer(serializers.ModelSerializer):
             "tier_name",
             "user_img",
         ]
+
+
+class PictureSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField(
+        source="user.username", read_only=True
+    )
+    small_thumbnail = serializers.CharField(read_only=True)
+    medium_thumbnail = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Picture
+        fields = [
+            "id",
+            "username",
+            "original_image",
+            "small_thumbnail",
+            "medium_thumbnail",
+        ]
+
+    def get_username(self, obj):
+        return obj.username.username
