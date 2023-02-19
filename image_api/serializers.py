@@ -44,3 +44,18 @@ class PictureSerializer(serializers.ModelSerializer):
 
     def get_username(self, obj):
         return obj.username.username
+
+
+class TierSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Tier
+        fields = [
+            "id",
+            "tier_name",
+            "max_height_small",
+            "max_height_medium",
+            "show_small_thumbnail",
+            "show_medium_thumbnail",
+            "show_original_image",
+            "show_temp_link",
+        ]
