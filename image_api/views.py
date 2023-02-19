@@ -80,3 +80,15 @@ class UserUploadImage(APIView):
 
     def perform_create(self, serializer):
         serializer.save(username=self.request.user)
+
+
+class UserPictureList(APIView):
+    queryset = Picture.objects.all()
+    serializer_class = UserUploadImageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [SessionAuthentication]
+
+    def get(self, request):
+        pictures = self.queryset.filter(username=request.user)
+        serializer = self.serializer_class(pictures, many=True)
+        return Response(serializer.data)

@@ -20,4 +20,5 @@ urlpatterns = [
     # for users urls
     path("", views.UserUrlList.as_view()),
     path("upload/", views.UserUploadImage.as_view(), name="upload"),
+    path("image-list/", views.UserPictureList.as_view(), name="image_list"),
 ]
