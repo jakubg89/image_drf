@@ -1,5 +1,15 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.validators import (
+    FileExtensionValidator,
+)
+
+from functools import partial
+from PIL import Image
+from io import BytesIO
+import sys
+import uuid
 
 
 class User(AbstractUser):
@@ -53,3 +63,111 @@ class Tier(models.Model):
 
     def __str__(self):
         return self.tier_name
+
+
+def get_upload_path(instance, file_name, image_type):
+    return f"uploads/{instance.username}/{image_type}/{file_name}"
+
+
+class Picture(models.Model):
+    img_type_validator = FileExtensionValidator(
+        allowed_extensions=["jpg", "png", "jpeg"]
+    )
+
+    username = models.ForeignKey(
+        "User", related_name="pictures", on_delete=models.CASCADE
+    )
+
+    original_image = models.ImageField(
+        blank=True,
+        null=True,
+        upload_to=partial(get_upload_path, image_type="original_images"),
+        validators=[img_type_validator],
+    )
+
+    small_thumbnail = models.ImageField(
+        blank=True,
+        null=True,
+        upload_to=partial(get_upload_path, image_type="small_thumbnail"),
+        validators=[img_type_validator],
+    )
+
+    medium_thumbnail = models.ImageField(
+        blank=True,
+        null=True,
+        upload_to=partial(get_upload_path, image_type="medium_thumbnail"),
+        validators=[img_type_validator],
+    )
+
+    class Meta:
+        managed = True
+        db_table = "picture"
+
+    def save(self, *args, **kwargs):
+        # user = User.objects.filter(username=self.username)[0]
+        user = self.username
+
+        image = Image.open(self.original_image)
+        file_format = image.format
+        file_mime = Image.MIME[image.format]
+        image = image.convert("RGB")
+        image.load()
+
+        if user.tier.show_small_thumbnail and user.tier.max_height_small:
+            if image.height > user.tier.max_height_small:
+                new_height = user.tier.max_height_small
+                self.small_thumbnail = self._create_thumbnail(
+                    new_height=new_height,
+                    image=image,
+                    file_format=file_format,
+                    file_mime=file_mime,
+                )
+            else:
+                self.small_thumbnail = self._save_copy(
+                    file_mime=file_mime, file_format=file_format, image=image
+                )
+
+        if user.tier.show_medium_thumbnail and user.tier.max_height_medium:
+            if image.height > user.tier.max_height_medium:
+                new_height = user.tier.max_height_medium
+                self.medium_thumbnail = self._create_thumbnail(
+                    new_height=new_height,
+                    image=image,
+                    file_format=file_format,
+                    file_mime=file_mime,
+                )
+            else:
+                self.small_thumbnail = self._save_copy(
+                    file_mime=file_mime, file_format=file_format, image=image
+                )
+        super().save(*args, **kwargs)
+
+    def _create_thumbnail(self, new_height, image, file_format, file_mime):
+        file_name = "".join([str(uuid.uuid4()), ".", file_format])
+        output = BytesIO()
+        new_width = int(new_height / (image.height / image.width))
+        image_resized_2 = image.resize((new_width, new_height), Image.LANCZOS)
+        image_resized_2.save(output, format=file_format)
+        output.seek(0)
+        return InMemoryUploadedFile(
+            output,
+            "ImageField",
+            file_name,
+            file_mime,
+            sys.getsizeof(output),
+            None,
+        )
+
+    def _save_copy(self, file_mime, file_format, image):
+        file_name = "".join([str(uuid.uuid4()), ".", file_format])
+        output = BytesIO()
+        image.save(output, format=file_format)
+        output.seek(0)
+        return InMemoryUploadedFile(
+            output,
+            "ImageField",
+            file_name,
+            file_mime,
+            sys.getsizeof(output),
+            None,
+        )
