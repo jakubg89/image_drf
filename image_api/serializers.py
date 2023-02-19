@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from image_api.models import User, Picture, Tier
 from rest_framework import serializers
 
@@ -59,3 +61,51 @@ class TierSerializer(serializers.HyperlinkedModelSerializer):
             "show_original_image",
             "show_temp_link",
         ]
+
+
+class UserUploadImageSerializer(serializers.ModelSerializer):
+    # original_image = serializers.ImageField(required=True)
+
+    class Meta:
+        model = Picture
+        fields = ["original_image"]
+        extra_kwargs = {"original_image": {"required": True}}
+
+    def get_small_thumbnail(self, obj):
+        return obj.small_thumbnail.url
+
+    def get_original_image(self, obj):
+        return obj.original_image.url
+
+    def get_medium_thumbnail(self, obj):
+        return obj.medium_thumbnail.url
+
+    def to_representation(self, instance):
+        HOST_NAME = settings.HOST_NAME
+
+        data = super(UserUploadImageSerializer, self).to_representation(
+            instance
+        )
+        user = instance.username
+
+        if user.tier.show_small_thumbnail:
+            small_thumbnail_url = "".join(
+                [HOST_NAME, self.get_small_thumbnail(instance)]
+            )
+            data["small_thumbnail"] = small_thumbnail_url
+
+        if user.tier.show_medium_thumbnail:
+            medium_thumbnail = "".join(
+                [HOST_NAME, self.get_medium_thumbnail(instance)]
+            )
+            data["medium_thumbnail"] = medium_thumbnail
+
+        if user.tier.show_original_image:
+            original_image = "".join(
+                [HOST_NAME, self.get_original_image(instance)]
+            )
+            data["original_image"] = original_image
+        else:
+            data.pop("original_image")
+
+        return data
