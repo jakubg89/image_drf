@@ -31,3 +31,16 @@ class CustomUserAdmin(UserAdmin):
 
 
 admin.site.register(User, CustomUserAdmin)
+
+
+@admin.register(Picture)
+class PictureAdmin(admin.ModelAdmin):
+    search_fields = ("username",)
+    fields = ("username", "original_image")
+    list_filter = ("username",)
+    list_display = (
+        "username",
+        "small_thumbnail",
+        "medium_thumbnail",
+        "original_image",
+    )
