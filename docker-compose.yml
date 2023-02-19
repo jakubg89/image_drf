@@ -2,15 +2,16 @@ version: '3.8'
 
 services:
   app:
-    restart: unless-stopped
-    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    container_name: image_api
-
     build:
-      context: ""
-      dockerfile: .
-
+      dockerfile: /Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/api:z
     ports:
       - '8000:8000'
-    volumes:
-      - '.:/api:z'
+    container_name: image_api
+
+
+
+
+
