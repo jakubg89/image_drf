@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import User, Picture
+from .models import User, Picture, Tier
 
 
 class PictureInline(admin.TabularInline):
@@ -44,3 +44,26 @@ class PictureAdmin(admin.ModelAdmin):
         "medium_thumbnail",
         "original_image",
     )
+
+
+@admin.register(Tier)
+class TierAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "tier_name",
+        "max_height_small",
+        "max_height_medium",
+        "show_small_thumbnail",
+        "show_medium_thumbnail",
+        "show_original_image",
+        "show_temp_link",
+    )
+
+    list_filter = (
+        "show_small_thumbnail",
+        "show_medium_thumbnail",
+        "show_original_image",
+        "show_temp_link",
+    )
+
+    search_fields = ("tier_name",)
