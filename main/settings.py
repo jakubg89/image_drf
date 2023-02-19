@@ -144,7 +144,7 @@ REST_FRAMEWORK = {
     ]
 }
 
-AUTH_USER_MODEL = 'main.User'
+AUTH_USER_MODEL = 'image_api.User'
 
 HOST_NAME = 'http://127.0.0.1:8000'
 
