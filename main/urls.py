@@ -16,4 +16,7 @@ urlpatterns = [
     path(
         "api-auth/", include("rest_framework.urls", namespace="rest_framework")
     ),
+
+    # for users urls
+    path("", views.UserUrlList.as_view()),
 ]
