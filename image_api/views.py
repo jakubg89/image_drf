@@ -57,7 +57,9 @@ class UserUrlList(APIView):
         for pattern in url_patterns:
             if str(pattern.pattern) in allowed_urls:
                 name = pattern.resolve(str(pattern.pattern))
-                url = "".join([settings.HOST_NAME, "/", str(pattern.pattern)])
+                url = "".join(
+                    [settings.HOST_NAME, "/", str(pattern.pattern)]
+                )
                 urls.update({name.url_name: url})
         return Response(urls)
 
@@ -72,11 +74,11 @@ class UserUploadImage(APIView):
         serializer = UserUploadImageSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(username=self.request.user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data,
+                            status=status.HTTP_200_OK)
         else:
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
         serializer.save(username=self.request.user)

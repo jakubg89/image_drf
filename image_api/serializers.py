@@ -29,7 +29,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 class PictureSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField(
-        source="user.username", read_only=True
+        source="user.username",
+        read_only=True
     )
     small_thumbnail = serializers.CharField(read_only=True)
     medium_thumbnail = serializers.CharField(read_only=True)
@@ -64,7 +65,6 @@ class TierSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class UserUploadImageSerializer(serializers.ModelSerializer):
-    # original_image = serializers.ImageField(required=True)
 
     class Meta:
         model = Picture
@@ -83,9 +83,10 @@ class UserUploadImageSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         HOST_NAME = settings.HOST_NAME
 
-        data = super(UserUploadImageSerializer, self).to_representation(
-            instance
-        )
+        data = super(
+            UserUploadImageSerializer, self
+        ).to_representation(instance)
+
         user = instance.username
 
         if user.tier.show_small_thumbnail:

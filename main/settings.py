@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-!24#+**wu6*9kh=qmsbvji_d4jnq)e)dpq3$y=1r48mz2^(sow
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -38,11 +38,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     # drf
-    'rest_framework',
-    'rest_framework.authtoken',
-
+    "rest_framework",
+    "rest_framework.authtoken",
     # apps
     "image_api",
 ]
@@ -127,7 +125,7 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
 STATIC_ROOT = os.path.join(BASE_DIR, "static/root/")
 
-MEDIA_URL = ''
+MEDIA_URL = ""
 MEDIA_ROOT = os.path.join(BASE_DIR)
 
 # Default primary key field type
@@ -138,13 +136,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Additional setting
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ]
 }
 
-AUTH_USER_MODEL = 'image_api.User'
+AUTH_USER_MODEL = "image_api.User"
 
-HOST_NAME = 'http://127.0.0.1:8000'
-
+HOST_NAME = "http://127.0.0.1:8000"
