@@ -1,1 +1,3 @@
 .idea
+uploads/
+db.sqlite3
