@@ -1,7 +1,12 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.urls import reverse
-from image_api.models import User
+from image_api.models import User, Tier
+import tempfile
+from PIL import Image
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import sys
 
 
 class UserUploadImageTestCase(APITestCase):
@@ -16,6 +21,23 @@ class UserUploadImageTestCase(APITestCase):
         self.client.force_login(user)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_wrong_file_upload(self):
+        url = reverse("upload")
+        tier = Tier.objects.create(tier_name="Basic", show_small_thumbnail=True)
+        user = User.objects.create_user(
+            username="user-test",
+            password="pass-test",
+            tier=tier)
+        self.client.force_login(user)
+
+        with tempfile.TemporaryFile(suffix=".gif") as temp:
+            image = Image.new("RGB", (100, 100), (255, 255, 255))
+            image.save(temp, format="gif")
+            temp.seek(0)
+            response = self.client.post(url, {'original_image': temp}, format='multipart')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_wrong_data_post(self):
         url = reverse("upload")
