@@ -79,8 +79,6 @@ class Picture(models.Model):
     )
 
     original_image = models.ImageField(
-        blank=True,
-        null=True,
         upload_to=partial(get_upload_path, image_type="original_images"),
         validators=[img_type_validator],
     )
