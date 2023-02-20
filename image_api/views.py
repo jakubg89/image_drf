@@ -41,7 +41,7 @@ class TierViewSet(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication]
 
 
-class UserUrlList(APIView):
+class UserRoot(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request):
