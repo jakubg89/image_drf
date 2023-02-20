@@ -15,10 +15,9 @@ router.register(r"staff/tiers", views.TierViewSet)
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("staff/", include(router.urls)),
-    path("api-auth/", include("rest_framework.urls",
-                              namespace="rest_framework")),
+    path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
     # for users urls
-    path("", views.UserUrlList.as_view()),
+    path("", views.UserUrlList.as_view(), name="user-root"),
     path("upload/", views.UserUploadImage.as_view(), name="upload"),
-    path("image-list/", views.UserPictureList.as_view(), name="image_list"),
+    path("image-list/", views.UserPictureList.as_view(), name="image-list"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
