@@ -80,6 +80,9 @@ class UserUploadImage(APIView):
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
 
+    def get(self, request):
+        return Response()
+
     def perform_create(self, serializer):
         serializer.save(username=self.request.user)
 
