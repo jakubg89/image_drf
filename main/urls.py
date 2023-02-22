@@ -8,9 +8,9 @@ from rest_framework import routers
 from image_api import views
 
 router = routers.DefaultRouter()
-router.register(r"staff/users", views.UserViewSet)
-router.register(r"staff/pictures", views.PicturesViewSet)
-router.register(r"staff/tiers", views.TierViewSet)
+router.register(r"users", views.UserViewSet)
+router.register(r"pictures", views.PicturesViewSet)
+router.register(r"tiers", views.TierViewSet)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
