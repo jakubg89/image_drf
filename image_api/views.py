@@ -76,9 +76,17 @@ class UserUploadImage(CreateAPIView):
 
 
 class UserPictureList(ListAPIView):
-    serializer_class = UserUploadImageSerializer
+    serializer_class = PictureSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [SessionAuthentication]
 
     def get_queryset(self):
         return Picture.objects.filter(user=self.request.user)
+
+
+class ServeFile:
+    pass
+
+
+class GenerateURL(CreateAPIView):
+    pass
