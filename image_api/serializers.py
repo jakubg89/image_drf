@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_image_url(self, user_obj):
         user_name = getattr(user_obj, "id")
-        return user_obj.pictures.objects.filter(user=user_name).values(
+        return Picture.objects.filter(user=user_name).values(
             "id", "original_image", "small_thumbnail", "medium_thumbnail"
         )
 
@@ -19,8 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             "id",
-            "user",
-            "password",
+            "username",
             "tier",
             "tier_name",
             "user_img",
@@ -38,14 +37,14 @@ class PictureSerializer(serializers.ModelSerializer):
         model = Picture
         fields = [
             "id",
-            "user",
+            "username",
             "original_image",
             "small_thumbnail",
             "medium_thumbnail",
         ]
 
     def get_username(self, obj):
-        return obj.username.username
+        return obj.user.username
 
 
 class TierSerializer(serializers.HyperlinkedModelSerializer):
