@@ -35,11 +35,11 @@ admin.site.register(User, CustomUserAdmin)
 
 @admin.register(Picture)
 class PictureAdmin(admin.ModelAdmin):
-    search_fields = ("username",)
-    fields = ("username", "original_image")
-    list_filter = ("username",)
+    search_fields = ("user",)
+    fields = ("user", "original_image")
+    list_filter = ("user",)
     list_display = (
-        "username",
+        "user",
         "small_thumbnail",
         "medium_thumbnail",
         "original_image",

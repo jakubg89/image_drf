@@ -66,7 +66,7 @@ class Tier(models.Model):
 
 
 def get_upload_path(instance, file_name, image_type):
-    return f"uploads/{instance.username}/{image_type}/{file_name}"
+    return f"uploads/{instance.user}/{image_type}/{file_name}"
 
 
 class Picture(models.Model):
@@ -74,8 +74,8 @@ class Picture(models.Model):
         allowed_extensions=["jpg", "png", "jpeg"]
     )
 
-    username = models.ForeignKey(
-        "User", related_name="pictures", on_delete=models.CASCADE
+    user = models.ForeignKey(
+        "User", related_name="user", on_delete=models.CASCADE
     )
 
     original_image = models.ImageField(
@@ -102,8 +102,7 @@ class Picture(models.Model):
         db_table = "picture"
 
     def save(self, *args, **kwargs):
-        # user = User.objects.filter(username=self.username)[0]
-        user = self.username
+        user = self.user
 
         image = Image.open(self.original_image)
         file_format = image.format
