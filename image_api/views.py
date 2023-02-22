@@ -4,6 +4,7 @@ from django.urls import get_resolver
 from rest_framework.authentication import SessionAuthentication
 from rest_framework import permissions
 from rest_framework import viewsets, status
+from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -31,7 +32,7 @@ class PicturesViewSet(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication]
 
     def perform_create(self, serializer):
-        serializer.save(username=self.request.user)
+        serializer.save(user=self.request.user)
 
 
 class TierViewSet(viewsets.ModelViewSet):
@@ -73,7 +74,7 @@ class UserUploadImage(APIView):
     def post(self, request, format=None):
         serializer = UserUploadImageSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(username=self.request.user)
+            serializer.save(user=self.request.user)
             return Response(serializer.data,
                             status=status.HTTP_200_OK)
         else:
@@ -84,16 +85,13 @@ class UserUploadImage(APIView):
         return Response()
 
     def perform_create(self, serializer):
-        serializer.save(username=self.request.user)
+        serializer.save(user=self.request.user)
 
 
-class UserPictureList(APIView):
-    queryset = Picture.objects.all()
+class UserPictureList(ListAPIView):
     serializer_class = UserUploadImageSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [SessionAuthentication]
 
-    def get(self, request):
-        pictures = self.queryset.filter(username=request.user)
-        serializer = self.serializer_class(pictures, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        return Picture.objects.filter(user=self.request.user)
