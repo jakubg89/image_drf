@@ -4,7 +4,7 @@ from django.urls import get_resolver
 from rest_framework.authentication import SessionAuthentication
 from rest_framework import permissions
 from rest_framework import viewsets, status
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -65,24 +65,11 @@ class UserRoot(APIView):
         return Response(urls)
 
 
-class UserUploadImage(APIView):
+class UserUploadImage(CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
     serializer_class = UserUploadImageSerializer
     authentication_classes = [SessionAuthentication]
-
-    def post(self, request, format=None):
-        serializer = UserUploadImageSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=self.request.user)
-            return Response(serializer.data,
-                            status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
-
-    def get(self, request):
-        return Response()
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
