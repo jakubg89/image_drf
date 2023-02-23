@@ -12,12 +12,15 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from image_api.models import User, Picture, Tier
 from image_api.serializers import (
     UserSerializer,
-    PictureSerializer,
+    PictureStaffSerializer,
+    PictureUserSerializer,
     TierSerializer,
-    UserUploadImageSerializer,
+    TempUrlSerializer,
 )
 
 
+# Staff views
+#
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -27,7 +30,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class PicturesViewSet(viewsets.ModelViewSet):
     queryset = Picture.objects.all()
-    serializer_class = PictureSerializer
+    serializer_class = PictureStaffSerializer
     permission_classes = [permissions.IsAdminUser]
     authentication_classes = [SessionAuthentication]
 
@@ -42,6 +45,12 @@ class TierViewSet(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication]
 
 
+#
+# End staff views
+
+
+# User views
+#
 class UserRoot(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -58,9 +67,7 @@ class UserRoot(APIView):
         for pattern in url_patterns:
             if str(pattern.pattern) in allowed_urls:
                 name = pattern.resolve(str(pattern.pattern))
-                url = "".join(
-                    [settings.HOST_NAME, "/", str(pattern.pattern)]
-                )
+                url = "".join([settings.HOST_NAME, "/", str(pattern.pattern)])
                 urls.update({name.url_name: url})
         return Response(urls)
 
@@ -68,7 +75,7 @@ class UserRoot(APIView):
 class UserUploadImage(CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
-    serializer_class = UserUploadImageSerializer
+    serializer_class = PictureUserSerializer
     authentication_classes = [SessionAuthentication]
 
     def perform_create(self, serializer):
@@ -76,7 +83,7 @@ class UserUploadImage(CreateAPIView):
 
 
 class UserPictureList(ListAPIView):
-    serializer_class = PictureSerializer
+    serializer_class = PictureUserSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [SessionAuthentication]
 
@@ -88,5 +95,13 @@ class ServeFile:
     pass
 
 
-class GenerateURL(CreateAPIView):
-    pass
+class GenerateTempURL(CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+    serializer_class = TempUrlSerializer
+    authentication_classes = [SessionAuthentication]
+
+    lookup_url_kwarg = "picture"
+
+    def perform_create(self, serializer):
+        serializer.save(picture_id=self.kwargs.get(self.lookup_url_kwarg))
