@@ -3,6 +3,8 @@ from django.db import models
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.validators import (
     FileExtensionValidator,
+    MaxValueValidator,
+    MinValueValidator,
 )
 
 from functools import partial
@@ -10,6 +12,8 @@ from PIL import Image
 from io import BytesIO
 import sys
 import uuid
+from datetime import timedelta
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -97,6 +101,8 @@ class Picture(models.Model):
         validators=[img_type_validator],
     )
 
+    date_added = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         managed = True
         db_table = "picture"
@@ -168,3 +174,32 @@ class Picture(models.Model):
             sys.getsizeof(output),
             None,
         )
+
+
+class TempUrl(models.Model):
+    picture = models.ForeignKey(
+        "Picture", related_name="picture", on_delete=models.CASCADE
+    )
+    created = models.DateTimeField()
+    url_duration = models.IntegerField(
+        blank=True,
+        null=True,
+        validators=[
+            MaxValueValidator(30000),
+            MinValueValidator(300)
+        ],
+    )
+    expiration_date = models.DateTimeField()
+    alias = models.CharField(max_length=16)
+
+    def save(self, *args, **kwargs):
+        time_now = timezone.now()
+
+        seconds = int(self.url_duration or 0)
+        expiration_date = time_now + timedelta(seconds=seconds)
+
+        self.created = time_now
+        self.expiration_date = expiration_date
+        self.alias = str(uuid.uuid4())[0:17]
+
+        super().save(*args, **kwargs)
