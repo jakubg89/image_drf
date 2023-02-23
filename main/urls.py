@@ -20,4 +20,5 @@ urlpatterns = [
     path("", views.UserRoot.as_view(), name="user-root"),
     path("upload/", views.UserUploadImage.as_view(), name="upload"),
     path("image-list/", views.UserPictureList.as_view(), name="image-list"),
+    path("get-url/<int:picture>", views.GenerateTempURL.as_view(), name="generate-url")
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
