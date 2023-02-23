@@ -39,6 +39,7 @@ class PictureAdmin(admin.ModelAdmin):
     fields = ("user", "original_image")
     list_filter = ("user",)
     list_display = (
+        "id",
         "user",
         "small_thumbnail",
         "medium_thumbnail",
