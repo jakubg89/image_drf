@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-
-from .models import User, Picture, Tier
+from .models import User, Picture, Tier, TempUrl
 
 
 class PictureInline(admin.TabularInline):
@@ -35,11 +34,12 @@ admin.site.register(User, CustomUserAdmin)
 
 @admin.register(Picture)
 class PictureAdmin(admin.ModelAdmin):
-    search_fields = ("username",)
-    fields = ("username", "original_image")
-    list_filter = ("username",)
+    search_fields = ("user",)
+    fields = ("user", "original_image")
+    list_filter = ("user",)
     list_display = (
-        "username",
+        "id",
+        "user",
         "small_thumbnail",
         "medium_thumbnail",
         "original_image",
@@ -67,3 +67,13 @@ class TierAdmin(admin.ModelAdmin):
     )
 
     search_fields = ("tier_name",)
+
+
+@admin.register(TempUrl)
+class TempUrlAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "created",
+        "expiration_date",
+        "url_duration",
+    )

@@ -1,24 +1,35 @@
+from datetime import datetime
+import pytz
+
 from django.conf import settings
+from django.http import HttpResponse
 from django.urls import get_resolver
+from django.core.files import File
 
 from rest_framework.authentication import SessionAuthentication
 from rest_framework import permissions
 from rest_framework import viewsets, status
+from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from image_api.models import User, Picture, Tier
+from image_api.models import User, Picture, Tier, TempUrl
 from image_api.serializers import (
     UserSerializer,
-    PictureSerializer,
+    PictureStaffSerializer,
+    PictureUserSerializer,
     TierSerializer,
-    UserUploadImageSerializer,
+    TempUrlSerializer,
 )
 
+from PIL import Image
 
+
+# Staff views
+#
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.select_related("tier").all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser]
     authentication_classes = [SessionAuthentication]
@@ -26,12 +37,12 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class PicturesViewSet(viewsets.ModelViewSet):
     queryset = Picture.objects.all()
-    serializer_class = PictureSerializer
+    serializer_class = PictureStaffSerializer
     permission_classes = [permissions.IsAdminUser]
     authentication_classes = [SessionAuthentication]
 
     def perform_create(self, serializer):
-        serializer.save(username=self.request.user)
+        serializer.save(user=self.request.user)
 
 
 class TierViewSet(viewsets.ModelViewSet):
@@ -39,8 +50,12 @@ class TierViewSet(viewsets.ModelViewSet):
     serializer_class = TierSerializer
     permission_classes = [permissions.IsAdminUser]
     authentication_classes = [SessionAuthentication]
+#
+# End staff views
 
 
+# User views
+#
 class UserRoot(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -50,50 +65,68 @@ class UserRoot(APIView):
             "upload/",
             "image-list/",
         ]
-        if request.user.is_authenticated:
-            if self.request.user.tier.show_temp_link:
-                allowed_urls.append("download/")
         urls = {}
         for pattern in url_patterns:
             if str(pattern.pattern) in allowed_urls:
                 name = pattern.resolve(str(pattern.pattern))
-                url = "".join(
-                    [settings.HOST_NAME, "/", str(pattern.pattern)]
-                )
+                url = "".join([settings.HOST_NAME, "/", str(pattern.pattern)])
                 urls.update({name.url_name: url})
         return Response(urls)
 
 
-class UserUploadImage(APIView):
+class UserUploadImage(CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
-    serializer_class = UserUploadImageSerializer
+    serializer_class = PictureUserSerializer
     authentication_classes = [SessionAuthentication]
 
-    def post(self, request, format=None):
-        serializer = UserUploadImageSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(username=self.request.user)
-            return Response(serializer.data,
-                            status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
-
-    def get(self, request):
-        return Response()
-
     def perform_create(self, serializer):
-        serializer.save(username=self.request.user)
+        serializer.save(user=self.request.user)
 
 
-class UserPictureList(APIView):
-    queryset = Picture.objects.all()
-    serializer_class = UserUploadImageSerializer
+class UserPictureList(ListAPIView):
+    serializer_class = PictureUserSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [SessionAuthentication]
 
-    def get(self, request):
-        pictures = self.queryset.filter(username=request.user)
-        serializer = self.serializer_class(pictures, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        return Picture.objects.select_related("user__tier").filter(
+            user=self.request.user
+        )
+
+
+def ServeFile(request, alias):
+
+    image = TempUrl.objects.get(alias=alias)
+
+    timezone_str = "UTC"
+    timezone = pytz.timezone(timezone_str)
+
+    if image.expiration_date > datetime.now(timezone):
+        full_path = f"{settings.BASE_DIR}{image.picture.original_image.url}"
+        file_name = image.picture.original_image.url.split("/")[-1]
+
+        with open(full_path, "rb") as f:
+            image_data = File(f)
+
+            img = Image.open(image_data)
+            content_type = Image.MIME[img.format]
+            image_data.seek(0)
+
+            response = HttpResponse(image_data, content_type=content_type)
+            response["Content-Disposition"] = f'attachment; filename="{file_name}"'
+        return response
+    else:
+        return HttpResponse("Link expired", status=400)
+
+
+class GenerateTempURL(CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+    serializer_class = TempUrlSerializer
+    authentication_classes = [SessionAuthentication]
+
+    lookup_url_kwarg = "picture"
+
+    def perform_create(self, serializer):
+        serializer.save(picture_id=self.kwargs.get(self.lookup_url_kwarg))

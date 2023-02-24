@@ -22,7 +22,7 @@ To run application you have to download repository from <a href="https://github.
 
 Extract data.
 
-Run ```docer-compose up``` or ```docter-compose up -d``` to perform task in background.
+Run ```docker-compose up``` or ```docker-compose up -d``` to perform task in background.
 
 After building container is finished we need to create superuser by command
 ```docker-compose run app python manage.py createsuperuser ```
@@ -34,3 +34,14 @@ Now we have access to API threw browser by opening ```127.0.0.1:8000```
 ```/upload/``` - uploading image
 
 ```/image-list/``` - list of uploaded image by logged-in user
+
+### Optimization
+
+Checking views
+
+![Alt text](before.jpg?raw=true "Title")
+
+Optimizing view that generates most queries by adding related objects.
+
+![Alt text](after.jpg?raw=true "Title")
+

@@ -3,6 +3,8 @@ from django.db import models
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.validators import (
     FileExtensionValidator,
+    MaxValueValidator,
+    MinValueValidator,
 )
 
 from functools import partial
@@ -10,6 +12,8 @@ from PIL import Image
 from io import BytesIO
 import sys
 import uuid
+from datetime import timedelta
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -66,17 +70,14 @@ class Tier(models.Model):
 
 
 def get_upload_path(instance, file_name, image_type):
-    return f"uploads/{instance.username}/{image_type}/{file_name}"
+    return f"uploads/{instance.user}/{image_type}/{file_name}"
 
 
 class Picture(models.Model):
     img_type_validator = FileExtensionValidator(
         allowed_extensions=["jpg", "png", "jpeg"]
     )
-
-    username = models.ForeignKey(
-        "User", related_name="pictures", on_delete=models.CASCADE
-    )
+    user = models.ForeignKey("User", related_name="user", on_delete=models.CASCADE)
 
     original_image = models.ImageField(
         upload_to=partial(get_upload_path, image_type="original_images"),
@@ -102,9 +103,7 @@ class Picture(models.Model):
         db_table = "picture"
 
     def save(self, *args, **kwargs):
-        # user = User.objects.filter(username=self.username)[0]
-        user = self.username
-
+        user = self.user
         image = Image.open(self.original_image)
         file_format = image.format
         file_mime = Image.MIME[image.format]
@@ -169,3 +168,29 @@ class Picture(models.Model):
             sys.getsizeof(output),
             None,
         )
+
+
+class TempUrl(models.Model):
+    picture = models.ForeignKey(
+        "Picture", related_name="picture", on_delete=models.CASCADE
+    )
+    created = models.DateTimeField()
+    url_duration = models.IntegerField(
+        blank=True,
+        null=True,
+        validators=[MaxValueValidator(30000), MinValueValidator(300)],
+    )
+    expiration_date = models.DateTimeField()
+    alias = models.CharField(max_length=16)
+
+    def save(self, *args, **kwargs):
+        time_now = timezone.now()
+
+        seconds = int(self.url_duration or 0)
+        expiration_date = time_now + timedelta(seconds=seconds)
+
+        self.created = time_now
+        self.expiration_date = expiration_date
+        self.alias = str(uuid.uuid4())[0:17]
+
+        super().save(*args, **kwargs)

@@ -8,9 +8,9 @@ from rest_framework import routers
 from image_api import views
 
 router = routers.DefaultRouter()
-router.register(r"staff/users", views.UserViewSet)
-router.register(r"staff/pictures", views.PicturesViewSet)
-router.register(r"staff/tiers", views.TierViewSet)
+router.register(r"users", views.UserViewSet)
+router.register(r"pictures", views.PicturesViewSet)
+router.register(r"tiers", views.TierViewSet)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -20,4 +20,6 @@ urlpatterns = [
     path("", views.UserRoot.as_view(), name="user-root"),
     path("upload/", views.UserUploadImage.as_view(), name="upload"),
     path("image-list/", views.UserPictureList.as_view(), name="image-list"),
+    path("get-url/<int:picture>", views.GenerateTempURL.as_view(), name="generate-url"),
+    path("download/<str:alias>", views.ServeFile, name="download-file"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
