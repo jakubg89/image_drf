@@ -78,9 +78,7 @@ class Picture(models.Model):
         allowed_extensions=["jpg", "png", "jpeg"]
     )
 
-    user = models.ForeignKey(
-        "User", related_name="user", on_delete=models.CASCADE
-    )
+    user = models.ForeignKey("User", related_name="user", on_delete=models.CASCADE)
 
     original_image = models.ImageField(
         upload_to=partial(get_upload_path, image_type="original_images"),
@@ -101,7 +99,7 @@ class Picture(models.Model):
         validators=[img_type_validator],
     )
 
-    date_added = models.DateTimeField(auto_now_add=True)
+    # date_added = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         managed = True
@@ -184,10 +182,7 @@ class TempUrl(models.Model):
     url_duration = models.IntegerField(
         blank=True,
         null=True,
-        validators=[
-            MaxValueValidator(30000),
-            MinValueValidator(300)
-        ],
+        validators=[MaxValueValidator(30000), MinValueValidator(300)],
     )
     expiration_date = models.DateTimeField()
     alias = models.CharField(max_length=16)
