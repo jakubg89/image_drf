@@ -1,5 +1,10 @@
+from datetime import datetime
+
+import pytz
 from django.conf import settings
+from django.http import HttpResponse
 from django.urls import get_resolver
+from django.core.files import File
 
 from rest_framework.authentication import SessionAuthentication
 from rest_framework import permissions
@@ -9,7 +14,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from image_api.models import User, Picture, Tier
+from image_api.models import User, Picture, Tier, TempUrl
 from image_api.serializers import (
     UserSerializer,
     PictureStaffSerializer,
@@ -17,6 +22,8 @@ from image_api.serializers import (
     TierSerializer,
     TempUrlSerializer,
 )
+
+from PIL import Image
 
 
 # Staff views
@@ -91,8 +98,29 @@ class UserPictureList(ListAPIView):
         return Picture.objects.filter(user=self.request.user)
 
 
-class ServeFile:
-    pass
+def ServeFile(request, alias):
+
+    image = TempUrl.objects.get(alias=alias)
+
+    timezone_str = "UTC"
+    timezone = pytz.timezone(timezone_str)
+
+    if image.expiration_date > datetime.now(timezone):
+        full_path = f"{settings.BASE_DIR}{image.picture.original_image.url}"
+        file_name = image.picture.original_image.url.split("/")[-1]
+
+        with open(full_path, "rb") as f:
+            image_data = File(f)
+
+            img = Image.open(image_data)
+            content_type = Image.MIME[img.format]
+            image_data.seek(0)
+
+            response = HttpResponse(image_data, content_type=content_type)
+            response["Content-Disposition"] = f'attachment; filename="{file_name}"'
+        return response
+    else:
+        return HttpResponse("Link expired", status=400)
 
 
 class GenerateTempURL(CreateAPIView):
