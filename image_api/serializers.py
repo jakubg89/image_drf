@@ -57,23 +57,18 @@ class PictureUserSerializer(serializers.ModelSerializer):
             data["small_thumbnail"] = small_thumbnail_url
 
         if user.tier.show_medium_thumbnail:
-            medium_thumbnail = "".join(
-                [HOST_NAME, self.get_medium_thumbnail(instance)]
-            )
+            medium_thumbnail = "".join([HOST_NAME, self.get_medium_thumbnail(instance)])
             data["medium_thumbnail"] = medium_thumbnail
 
         if user.tier.show_original_image:
-            original_image = "".join(
-                [HOST_NAME, self.get_original_image(instance)]
-            )
+            original_image = "".join([HOST_NAME, self.get_original_image(instance)])
             data["original_image"] = original_image
         else:
             data.pop("original_image")
         if user.tier.show_temp_link:
             data.update(
                 {
-                    "get_download_url":
-                        f"{HOST_NAME}/get-url/{self.get_picture_pk(instance)}"
+                    "get_download_url": f"{HOST_NAME}/get-url/{self.get_picture_pk(instance)}"
                 }
             )
         return data
@@ -117,10 +112,7 @@ class TempUrlSerializer(serializers.ModelSerializer):
             "and less than or equal to 30000.",
         },
     )
-    picture = serializers.CharField(
-        source="picture.original_image",
-        read_only=True
-    )
+    picture = serializers.CharField(source="picture.original_image", read_only=True)
     expiration_date = serializers.DateTimeField(
         format="%Y-%m-%d %H:%M:%S", read_only=True
     )
