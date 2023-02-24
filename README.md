@@ -34,3 +34,13 @@ Now we have access to API threw browser by opening ```127.0.0.1:8000```
 ```/upload/``` - uploading image
 
 ```/image-list/``` - list of uploaded image by logged-in user
+
+### Optimization
+
+Checking views
+
+![Alt text](before.jpg?raw=true "Title")
+
+Optimizing view that generates most queries by adding related objects.
+
+![Alt text](after.jpg?raw=true "Title")
