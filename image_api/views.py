@@ -29,7 +29,7 @@ from PIL import Image
 # Staff views
 #
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.select_related("tier").all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser]
     authentication_classes = [SessionAuthentication]
@@ -67,6 +67,9 @@ class UserRoot(APIView):
             "upload/",
             "image-list/",
         ]
+        if request.user.is_authenticated:
+            if self.request.user.tier.show_temp_link:
+                allowed_urls.append("download/")
         urls = {}
         for pattern in url_patterns:
             if str(pattern.pattern) in allowed_urls:
@@ -92,7 +95,9 @@ class UserPictureList(ListAPIView):
     authentication_classes = [SessionAuthentication]
 
     def get_queryset(self):
-        return Picture.objects.filter(user=self.request.user)
+        return Picture.objects.select_related("user__tier").filter(
+            user=self.request.user
+        )
 
 
 def ServeFile(request, alias):
