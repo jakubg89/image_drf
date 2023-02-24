@@ -22,7 +22,7 @@ To run application you have to download repository from <a href="https://github.
 
 Extract data.
 
-Run ```docer-compose up``` or ```docter-compose up -d``` to perform task in background.
+Run ```docker-compose up``` or ```docker-compose up -d``` to perform task in background.
 
 After building container is finished we need to create superuser by command
 ```docker-compose run app python manage.py createsuperuser ```
