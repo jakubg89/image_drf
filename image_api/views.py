@@ -67,9 +67,6 @@ class UserRoot(APIView):
             "upload/",
             "image-list/",
         ]
-        if request.user.is_authenticated:
-            if self.request.user.tier.show_temp_link:
-                allowed_urls.append("download/")
         urls = {}
         for pattern in url_patterns:
             if str(pattern.pattern) in allowed_urls:
