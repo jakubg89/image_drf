@@ -9,7 +9,8 @@ There are 3 build in tiers:
 - **Basic** allows to store and get url to small image in maximum height of 200px
 - **Premium** allows to store and get url to small image in maximum height of 200px, medium image in maximum height of 400px and orginal uploaded image
 - **Enterprise** allows to store and get url to small image in maximum height of 200px, medium image in maximum height of 400px,  orginal uploaded image and ability to generate temporary urls.
-- 
+
+
 Custom tier can be created threw admin panel where:
 - small image maximum height can be set
 - medium image maxium height can be set
