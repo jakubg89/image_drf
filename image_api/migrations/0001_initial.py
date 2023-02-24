@@ -198,7 +198,6 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-
             name="Tier",
             fields=[
                 (
@@ -260,7 +259,6 @@ class Migration(migrations.Migration):
         ),
         migrations.CreateModel(
             name="TempUrl",
-
             fields=[
                 (
                     "id",

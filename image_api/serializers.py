@@ -47,7 +47,6 @@ class PictureUserSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         HOST_NAME = settings.HOST_NAME
         data = super(PictureUserSerializer, self).to_representation(instance)
-
         user = instance.user
 
         if user.tier.show_small_thumbnail:

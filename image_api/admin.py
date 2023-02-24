@@ -3,7 +3,6 @@ from django.contrib.auth.admin import UserAdmin
 from .models import User, Picture, Tier, TempUrl
 
 
-
 class PictureInline(admin.TabularInline):
     model = Picture
     readonly_fields = ("original_image", "small_thumbnail", "medium_thumbnail")

@@ -16,7 +16,6 @@ from datetime import timedelta
 from django.utils import timezone
 
 
-
 class User(AbstractUser):
     tier = models.ForeignKey(
         "Tier",
@@ -78,9 +77,7 @@ class Picture(models.Model):
     img_type_validator = FileExtensionValidator(
         allowed_extensions=["jpg", "png", "jpeg"]
     )
-
     user = models.ForeignKey("User", related_name="user", on_delete=models.CASCADE)
-
 
     original_image = models.ImageField(
         upload_to=partial(get_upload_path, image_type="original_images"),
@@ -100,14 +97,13 @@ class Picture(models.Model):
         upload_to=partial(get_upload_path, image_type="medium_thumbnail"),
         validators=[img_type_validator],
     )
-    
+
     class Meta:
         managed = True
         db_table = "picture"
 
     def save(self, *args, **kwargs):
         user = self.user
-
         image = Image.open(self.original_image)
         file_format = image.format
         file_mime = Image.MIME[image.format]

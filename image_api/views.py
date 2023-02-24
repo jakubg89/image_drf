@@ -1,6 +1,6 @@
 from datetime import datetime
-
 import pytz
+
 from django.conf import settings
 from django.http import HttpResponse
 from django.urls import get_resolver
