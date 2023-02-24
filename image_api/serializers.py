@@ -1,5 +1,4 @@
 from django.conf import settings
-
 from image_api.models import User, Picture, Tier, TempUrl
 from rest_framework import serializers
 
@@ -27,6 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class PictureUserSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Picture
         fields = ["original_image"]

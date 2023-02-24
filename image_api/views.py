@@ -50,8 +50,6 @@ class TierViewSet(viewsets.ModelViewSet):
     serializer_class = TierSerializer
     permission_classes = [permissions.IsAdminUser]
     authentication_classes = [SessionAuthentication]
-
-
 #
 # End staff views
 

@@ -44,3 +44,4 @@ Checking views
 Optimizing view that generates most queries by adding related objects.
 
 ![Alt text](after.jpg?raw=true "Title")
+

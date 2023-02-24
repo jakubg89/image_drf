@@ -16,6 +16,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 
+
 class User(AbstractUser):
     tier = models.ForeignKey(
         "Tier",
@@ -80,6 +81,7 @@ class Picture(models.Model):
 
     user = models.ForeignKey("User", related_name="user", on_delete=models.CASCADE)
 
+
     original_image = models.ImageField(
         upload_to=partial(get_upload_path, image_type="original_images"),
         validators=[img_type_validator],
@@ -98,9 +100,7 @@ class Picture(models.Model):
         upload_to=partial(get_upload_path, image_type="medium_thumbnail"),
         validators=[img_type_validator],
     )
-
-    # date_added = models.DateTimeField(auto_now_add=True)
-
+    
     class Meta:
         managed = True
         db_table = "picture"
